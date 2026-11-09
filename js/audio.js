@@ -40,7 +40,7 @@ class SoundManager {
 
     init() {
         if (!(window.AudioContext || window.webkitAudioContext)) return;
-        const unlock = () => this.recoverAudio(true);
+        const unlock = event => { if (event.isTrusted) this.recoverAudio(true); };
         ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown'].forEach(type => {
             window.addEventListener(type, unlock, { passive: true, capture: true });
         });
@@ -71,7 +71,7 @@ class SoundManager {
         document.addEventListener('click', event => {
             if (event.target.closest?.('.home-cat') || !event.target.closest?.('#title-screen button, #title-cats img')) return;
             this.recoverAudio(true);
-            if (this.ctx?.state === 'running') this.playMenuTap();
+            this.whenAudioReady(() => this.playMenuTap());
         }, true);
         this.audioWatchdog = setInterval(() => {
             if (document.hidden || !this.foreground || !this.ctx) return;
@@ -107,12 +107,33 @@ class SoundManager {
         this.lastClock = null;
     }
 
+    whenAudioReady(callback) {
+        if (this.ctx?.state === 'running') callback();
+        else (this.readyCallbacks ||= []).push(callback);
+    }
+
+    enterHomeAudio() {
+        this.titleGreeted = false;
+        this.recoverAudio(false);
+    }
+
     recoverAudio(gesture = false) {
-        if (document.hidden || this.foreground === false) return;
+        if (document.hidden) return;
+        if (gesture) this.foreground = true;
+        if (this.foreground === false) return;
         try {
             if (this.ctx?.state === 'closed' || (gesture && this.needsRebuild)) this.discardContext();
             const ctx = this.ensureCtx();
             if (!ctx) return;
+            if (gesture) {
+                this.audioUnlocked = true;
+                // Start a source inside the real touch event, including on iOS WebViews.
+                const source = ctx.createBufferSource();
+                source.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+                source.connect(ctx.destination);
+                source.onended = () => source.disconnect();
+                source.start(0);
+            }
             if (ctx.state === 'running') { this.audioReady(ctx); return; }
             // A fresh real interaction retries even if a previous resume promise never settled.
             if (this.resumePending === ctx && !gesture) return;
@@ -142,11 +163,14 @@ class SoundManager {
         this.updateGainNodes();
         if (!this.bgmPlaying || !this.bgmTimer) this.startBgm();
         this.startAmbientLoop();
-        if (!this.titleGreeted && document.getElementById('title-screen') &&
+        if (this.audioUnlocked && !this.titleGreeted && this.canPlaySfx() && document.getElementById('title-screen') &&
             !document.getElementById('title-screen').classList.contains('hidden')) {
             this.titleGreeted = true;
             this.playHomeWelcome();
         }
+        const callbacks = this.readyCallbacks || [];
+        this.readyCallbacks = [];
+        callbacks.forEach(callback => callback());
     }
 
     playMenuTap() {

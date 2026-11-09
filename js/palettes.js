@@ -5,7 +5,7 @@ window.CatPalettes = (() => {
     const normalize = id => options.some(option => option.id === id) ? id : 0;
     const getColors = id => {
         const palette = options[normalize(id)];
-        const base = 'assets/images/cats/' + (palette.id === 0 ? 'palette_reference/' : `palette_${palette.id}/`);
+        const base = 'assets/images/cats/' + (palette.id === 0 ? 'palette_reference_clean/' : `palette_${palette.id}/`);
         return names.map((name, i) => ({
             id: i, name, hex: palette.colors[i],
             normal: `${base}cat_${name}.png`, blink: `${base}cat_${name}_blink.png`

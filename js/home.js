@@ -51,6 +51,7 @@ class HomeScene {
             cat.setAttribute('aria-label', `摸摸第 ${index + 1} 只猫咪`);
             cat.style.cssText = `left:${pose.x}px;top:${pose.y}px;width:${pose.size}px;height:${pose.size}px;--tilt:${pose.tilt}deg;--breath-delay:${-index * .63}s;z-index:${index < 3 ? 1 : 3}`;
             const img = document.createElement('img');
+            img.className = 'cat-sprite';
             const color = this.game.board.colors[pose.color];
             img.src = pose.asleep ? color.blink : color.normal;
             img.alt = '';
@@ -127,6 +128,7 @@ class HomeScene {
         this.requestLayout();
         if (this.active || document.hidden) return;
         this.active = true;
+        window.sounds.enterHomeAudio();
         this.scheduleBlink();
         this.scheduleMeow();
     }
@@ -152,14 +154,35 @@ class HomeScene {
             if (this.root.classList.contains('hidden')) return;
             const width = this.root.clientWidth, height = this.root.clientHeight;
             if (!width || !height) return;
-            const scale = Math.min(width / 390, height / 844);
+            const styles = getComputedStyle(this.root);
+            const safeTop = parseFloat(styles.getPropertyValue('--home-safe-top')) || 0;
+            const safeBottom = parseFloat(styles.getPropertyValue('--home-safe-bottom')) || 0;
+            const usable = height - safeTop - safeBottom;
+            const landscape = width > height * 1.2;
+            this.root.classList.toggle('home-landscape', landscape);
+            const scale = Math.min(width / 390, Math.max(.75, usable / 740), 1.25);
             this.root.style.setProperty('--home-scale', scale);
-            const rootRect = this.root.getBoundingClientRect();
-            const menuBottom = this.menu.getBoundingClientRect().bottom - rootRect.top;
-            const bottom = Math.max(18, height * .044);
-            const available = Math.max(100, height - bottom - menuBottom - 22);
-            const catScale = Math.min(width / 390, available / 255);
-            this.surface.style.setProperty('--cat-scale', catScale);
+            this.root.style.setProperty('--home-heading-top', `${safeTop + usable * .07227}px`);
+            const bottom = safeBottom + Math.max(18, usable * .035);
+            if (landscape) {
+                this.root.style.setProperty('--home-menu-top', `${safeTop + usable / 2}px`);
+                this.surface.style.setProperty('--cat-scale', Math.min(width * .46 / 390, usable * .48 / 255));
+            } else {
+                const rootTop = this.root.getBoundingClientRect().top;
+                const headingBottom = this.root.querySelector('.home-heading').getBoundingClientRect().bottom - rootTop;
+                const menuHeight = this.menu.getBoundingClientRect().height;
+                const gap = Math.max(14, Math.min(22, usable * .026));
+                const minimumTop = headingBottom + Math.min(32, usable * .04);
+                const desiredTop = safeTop + usable * (this.root.classList.contains('has-stage-save') ? .2938 : .33056);
+                // Reserve room for all five faces even with the browser controls expanded.
+                const desiredCats = 255 * Math.min(width / 390, 1.15);
+                const reservedCats = desiredCats * (usable < 740 ? .75 : .95);
+                const latestTop = height - bottom - gap - menuHeight - reservedCats;
+                const menuTop = Math.max(minimumTop, Math.min(desiredTop, latestTop));
+                this.root.style.setProperty('--home-menu-top', `${menuTop}px`);
+                const available = Math.max(0, height - bottom - menuTop - menuHeight - gap);
+                this.surface.style.setProperty('--cat-scale', Math.min(width / 390, available / 255));
+            }
             this.surface.style.bottom = `${bottom}px`;
         });
     }

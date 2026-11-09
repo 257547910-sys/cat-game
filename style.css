@@ -122,7 +122,7 @@ body { display: flex; justify-content: center; align-items: center; }
 }
 .board-cell { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .board-cell.cell-empty { pointer-events: none; }
-.cat-sprite { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 0 rgba(40,60,90,.35)); }
+.cat-sprite, #title-screen .home-cat img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 0 rgba(40,60,90,.35)); }
 .cat-sprite.falling { animation: dropIn .4s cubic-bezier(.3,.85,.35,1.12) both; }
 .cat-sprite.spawn { animation: spawnIn .55s cubic-bezier(.3,.85,.35,1.12) both; }
 @keyframes dropIn { from { transform: translateY(calc(var(--fall) * -104%)); } to { transform: translateY(0); } }
@@ -490,8 +490,8 @@ body.page-backgrounded *, body.page-backgrounded *::before, body.page-background
 #title-screen .title-best { margin: 16px -20px 0; padding: 0; background: none; border-radius: 0; color: #7d8c6d; font-size: 10px; font-weight: 500; text-align: center; line-height: 1.4; }
 #title-screen .home-cat-surface { --cat-scale: 1; position: absolute; width: 390px; height: 255px; bottom: 4.4%; left: 50%; transform: translateX(-50%) scale(var(--cat-scale)); transform-origin: center bottom; z-index: 3; pointer-events: none; }
 #title-screen .title-cats { position: absolute; inset: 0; width: 390px; height: 255px; display: block; margin: 0; pointer-events: none; }
-#title-screen .home-cat { position: absolute; border: 0; background: none; padding: 0; cursor: pointer; transform: rotate(var(--tilt)); pointer-events: auto; -webkit-tap-highlight-color: transparent; }
-#title-screen .home-cat img { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 3px 0 #92795122); transform-origin: center bottom; animation: homeBreathe 4.2s ease-in-out infinite; animation-delay: var(--breath-delay); pointer-events: none; }
+#title-screen .home-cat { position: absolute; border: 0; background: transparent; padding: 0; appearance: none; -webkit-appearance: none; opacity: 1; filter: none; cursor: pointer; transform: rotate(var(--tilt)); pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+#title-screen .home-cat img { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; opacity: 1; mix-blend-mode: normal; transform-origin: center bottom; animation: homeBreathe 4.2s ease-in-out infinite; animation-delay: var(--breath-delay); pointer-events: none; }
 #title-screen .home-cat.petted img { animation: homeNuzzle .6s ease-in-out; }
 #title-screen .home-cat-shadow { position: absolute; left: 43px; right: 35px; top: 218px; height: 29px; border-radius: 50%; background: #b9986530; transform: rotate(2deg); }
 #game-app.home-visible > #background-container, #game-app.home-visible > #hud, #game-app.home-visible > #board-container, #game-app.home-visible > #game-footer { visibility: hidden; }
@@ -500,3 +500,33 @@ body.page-backgrounded *, body.page-backgrounded *::before, body.page-background
 @keyframes homeNuzzle { 0%,100% { transform: translateY(0); } 45% { transform: translateY(-7px) rotate(-3deg); } 70% { transform: translateY(-2px) rotate(2deg); } }
 @media (max-height: 600px) { #title-screen .title-best { margin-top: 10px; font-size: 9px; } #title-screen .home-utilities { margin-top: 14px; } }
 @media (prefers-reduced-motion: reduce) { #title-screen .home-cat img, #title-screen .home-cat.petted img { animation: none; } }
+
+/* Mobile browser controls change the available viewport independently of screen size. */
+html { background: #fff5dc; }
+body { height: var(--app-viewport-height, 100vh); height: var(--app-viewport-height, 100dvh); min-height: 0; }
+#game-app { height: var(--app-viewport-height, 100vh); height: var(--app-viewport-height, 100dvh); }
+@media (hover: none) and (pointer: coarse) {
+    #game-app { width: 100%; max-width: none; max-height: none; }
+}
+#title-screen {
+    --home-safe-top: env(safe-area-inset-top, 0px);
+    --home-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+#title-screen .home-scenery {
+    /* Use a covered background with intrinsic dimensions, never a letterboxed SVG image. */
+    background: #fff5dc url('assets/images/home/beach.svg?v=phone-fit-2') center center / cover no-repeat;
+}
+#title-screen .home-heading { top: var(--home-heading-top, 7.227%); }
+#title-screen .title-btns, #title-screen.has-stage-save .title-btns { top: var(--home-menu-top, 33.056%); width: 66.667%; }
+#title-screen.has-stage-save #title-new { min-height: 36px; height: 36px; }
+@media (max-height: 740px) {
+    #title-screen .home-heading-space { height: calc(12px * var(--home-scale)); }
+    #title-screen .home-brand { margin-top: calc(10px * var(--home-scale)); }
+}
+#title-screen.home-landscape .home-heading { left: 0; right: auto; width: 48%; }
+#title-screen.home-landscape .home-heading-space { height: 6px; }
+#title-screen.home-landscape .home-brand { margin-top: 8px; }
+#title-screen.home-landscape .title-btns { left: 74%; width: 43%; max-width: 330px; transform: translate(-50%, -50%); }
+#title-screen.home-landscape .home-cat-surface { left: 24%; }
+#title-screen.home-landscape .home-utilities { margin-top: 14px; }
+#title-screen.home-landscape .title-best { margin-top: 10px; }
