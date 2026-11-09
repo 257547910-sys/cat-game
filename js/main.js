@@ -20,6 +20,7 @@ class PopCatGame {
         this.luckyWheel = new LuckyWheel(this);
         this.leaderboardUI = new LeaderboardUI(this);
         this.effects = new EffectsManager(this);
+        this.homeScene = new HomeScene(this);
 
         this.bindUI();
         this.shownScore = this.state.score;
@@ -46,20 +47,21 @@ class PopCatGame {
             StorageManager.saveGame(this.state);
         }
         this.propsManager.cancelTool();
-        const cats = this.$('title-cats');
-        cats.innerHTML = this.board.colors.map(c => `<img src="${c.normal}" alt="">`).join('');
+        this.homeScene.renderCats();
         const stageRun = StorageManager.getSavedRun(this.state, 'stage');
         const endlessRun = StorageManager.getSavedRun(this.state, 'endless');
         const cont = this.$('title-continue');
         cont.classList.toggle('hidden', !stageRun);
         cont.textContent = stageRun ? `继续游戏 · 第 ${stageRun.stage} 关` : '继续游戏';
-        this.$('title-endless').textContent = endlessRun ? '继续无尽模式' : '无尽模式';
+        this.$('title-endless').querySelector('.home-button-label').textContent = endlessRun ? '继续无尽模式' : '无尽模式';
         this.$('title-best').textContent = `关卡最高 ${this.state.highScore.toLocaleString()} · 无尽最高 ${(this.state.endlessBest || 0).toLocaleString()}`;
+        this.$('title-screen').classList.toggle('has-stage-save', !!stageRun);
         this.$('title-screen').classList.remove('hidden');
         this.playing = false;
+        this.homeScene.start();
     }
 
-    hideTitle() { this.$('title-screen').classList.add('hidden'); }
+    hideTitle() { this.homeScene.stop(); this.$('title-screen').classList.add('hidden'); }
 
     continueGame(mode = 'stage') {
         const run = StorageManager.getSavedRun(this.state, mode);
@@ -277,7 +279,7 @@ class PopCatGame {
         this.board.clearSelection();
         this.board.colors = CatPalettes.getColors(this.state.catPalette);
         if (this.board.grid.length) this.board.render();
-        this.$('title-cats').innerHTML = this.board.colors.map(color => `<img src="${color.normal}" alt="">`).join('');
+        this.homeScene.renderCats();
         const selected = this.propsManager.selectedCatCoords;
         if (selected && !this.$('color-picker-modal').classList.contains('hidden')) {
             this.propsManager.showColorPicker(selected.r, selected.c, selected.currentColor);

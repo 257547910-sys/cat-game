@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>彩喵幻境</title>
-    <link rel="stylesheet" href="style.css?v=record-rewards-1">
+    <link rel="stylesheet" href="style.css?v=independent-home-1">
 </head>
 <body>
 <div id="game-app">
@@ -52,18 +52,17 @@
     </footer>
 
     <!-- 标题画面 -->
-    <section id="title-screen">
-        <div class="logo-main">彩喵幻境</div>
-        <div class="title-cats" id="title-cats"></div>
+    <section id="title-screen" aria-label="彩喵幻境主页">
+        <img class="home-scenery" src="assets/images/home/beach.svg" alt="" draggable="false">
+        <div class="home-heading"><h1 class="logo-main">彩喵幻境</h1><div class="home-heading-space" aria-hidden="true"></div><svg class="home-brand" viewBox="0 0 63 16" aria-hidden="true"><path d="M1 9q7-5 14 0t14 0t14 0t14 0"/></svg></div>
         <div class="title-btns">
-            <button class="btn go" id="title-continue">继续游戏</button>
-            <button class="btn warn" id="title-new">新的一局</button>
-            <button class="btn alt" id="title-endless">无尽模式</button>
-            <button class="btn alt" id="btn-open-wheel">每日转盘</button>
-            <button class="btn alt" id="title-rank">排行榜</button>
-            <button class="btn plain" id="title-settings">设置</button>
+            <button type="button" class="home-primary" id="title-continue">继续游戏</button>
+            <button type="button" class="home-primary" id="title-new"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="6" cy="7" rx="2.6" ry="3.3"/><ellipse cx="12" cy="5" rx="2.5" ry="3.2"/><ellipse cx="18" cy="7" rx="2.6" ry="3.3"/><path d="M5 17c0-3 4-7 7-7s7 4 7 7c0 5-4 3-7 3s-7 2-7-3"/></svg>新的一局</button>
+            <button type="button" class="home-secondary" id="title-endless"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c0-8 7-8 10 0s10 8 10 0-7-8-10 0S2 20 2 12Z"/></svg><span class="home-button-label">无尽模式</span></button>
+            <div class="home-utilities"><button type="button" class="home-utility" id="btn-open-wheel"><span class="home-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16M6.4 6.4l11.2 11.2M6.4 17.6 17.6 6.4"/><circle cx="12" cy="12" r="1.7"/></svg></span><span>每日转盘</span></button><button type="button" class="home-utility" id="title-rank"><span class="home-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4Zm0 2H4v2q0 4 4 4m9-6h3v2q0 4-4 4m-4 2v5m-4 1h8"/></svg></span><span>排行榜</span></button><button type="button" class="home-utility" id="title-settings"><span class="home-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3 6 0 1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1Z"/><circle cx="12" cy="12" r="3.5"/></svg></span><span>设置</span></button></div>
+            <div class="title-best" id="title-best"></div>
         </div>
-        <div class="title-best" id="title-best"></div>
+        <div class="home-cat-surface"><div class="home-cat-shadow"></div><div id="title-cats" class="title-cats" aria-label="猫咪伙伴"></div></div>
     </section>
 </div>
 
@@ -231,6 +230,7 @@
 <script src="js/wheel.js"></script>
 <script src="js/leaderboard.js"></script>
 <script src="js/effects.js"></script>
+<script src="js/home.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

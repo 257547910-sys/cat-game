@@ -34,7 +34,7 @@ class EffectsManager {
     // 水面不定时荡开涟漪（泳池区域大致在画面中部）
     loopRipple() {
         const go = () => {
-            if (document.hidden || this.game.board.isAnimating) { setTimeout(go, 2500); return; }
+            if (document.hidden || !this.game.playing || this.game.board.isAnimating) { setTimeout(go, 2500); return; }
             const ring = document.createElement('div');
             ring.className = 'ripple-ring';
             ring.style.left = `${18 + Math.random() * 64}%`;
@@ -48,7 +48,7 @@ class EffectsManager {
 
     loopGlint() {
         setInterval(() => {
-            if (document.hidden || this.game.board.isAnimating) return;
+            if (document.hidden || !this.game.playing || this.game.board.isAnimating) return;
             const g = document.createElement('div');
             g.className = 'glint';
             g.style.left = `${8 + Math.random() * 84}%`;
@@ -61,7 +61,7 @@ class EffectsManager {
     // 海鸥：偶尔飞过，并叫一声
     loopGull() {
         const go = () => {
-            if (document.hidden || this.game.board.isAnimating) { setTimeout(go, 9000); return; }
+            if (document.hidden || !this.game.playing || this.game.board.isAnimating) { setTimeout(go, 9000); return; }
             const bird = document.createElement('div');
             const ltr = Math.random() > 0.4;
             const dur = 9 + Math.random() * 4;
@@ -80,7 +80,7 @@ class EffectsManager {
     // 季节飘落物：夏天无，春天花瓣，秋天落叶，冬天雪
     spawnParticle() {
         const kind = { spring: 'petal', autumn: 'leaf', winter: 'snow' }[this.game.state.theme];
-        if (!kind || document.hidden || this.game.board.isAnimating || this.partLayer.childElementCount > 22) return;
+        if (!kind || document.hidden || !this.game.playing || this.game.board.isAnimating || this.partLayer.childElementCount > 22) return;
         const p = document.createElement('div');
         p.className = `particle ${kind}`;
         const dur = 7 + Math.random() * 6;

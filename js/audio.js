@@ -69,7 +69,7 @@ class SoundManager {
         // Try autoplay when allowed; the first touch unlocks restricted browsers.
         setTimeout(foreground, 0);
         document.addEventListener('click', event => {
-            if (!event.target.closest?.('#title-screen button, #title-cats img')) return;
+            if (event.target.closest?.('.home-cat') || !event.target.closest?.('#title-screen button, #title-cats img')) return;
             this.recoverAudio(true);
             if (this.ctx?.state === 'running') this.playMenuTap();
         }, true);
