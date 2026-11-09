@@ -1,0 +1,117 @@
+{
+  "description": "关卡模式配置表 (Level Mode Stages Configuration)",
+  "version": "1.0.0",
+  "totalStages": 30,
+  "stages": [
+    {
+      "stageId": 1,
+      "name": "海滩初遇",
+      "season": "summer",
+      "targetScore": 1000,
+      "maxMoves": null,
+      "stars": [1000, 1500, 2000],
+      "rewardBiscuits": 1,
+      "rewardWands": 0,
+      "intro": "点击2只以上相连的同色猫咪进行消除，感受重力下落的拼接乐趣！"
+    },
+    {
+      "stageId": 2,
+      "name": "潮汐汇聚",
+      "season": "summer",
+      "targetScore": 2500,
+      "maxMoves": null,
+      "stars": [2500, 3200, 4000],
+      "rewardBiscuits": 1,
+      "rewardWands": 1,
+      "intro": "尽量从上方消除，让猫咪下落自然聚合成大块！"
+    },
+    {
+      "stageId": 3,
+      "name": "贝壳沙洲",
+      "season": "summer",
+      "targetScore": 4500,
+      "maxMoves": null,
+      "stars": [4500, 5500, 6800],
+      "rewardBiscuits": 2,
+      "rewardWands": 1,
+      "intro": "注意收尾控制！最后剩余猫咪少于10只能拿丰厚收尾奖励！"
+    },
+    {
+      "stageId": 4,
+      "name": "暖春樱风",
+      "season": "spring",
+      "targetScore": 7000,
+      "maxMoves": null,
+      "stars": [7000, 8500, 10500],
+      "rewardBiscuits": 2,
+      "rewardWands": 1,
+      "intro": "春季主题开启！善用染色棒将单只孤猫接入大色块！"
+    },
+    {
+      "stageId": 5,
+      "name": "樱落浅滩",
+      "season": "spring",
+      "targetScore": 10000,
+      "maxMoves": null,
+      "stars": [10000, 12000, 15000],
+      "rewardBiscuits": 3,
+      "rewardWands": 2,
+      "intro": "大片消除平方得分极高，10只消除可直获500分！"
+    },
+    {
+      "stageId": 6,
+      "name": "金秋落霞",
+      "season": "autumn",
+      "targetScore": 13500,
+      "maxMoves": null,
+      "stars": [13500, 16000, 20000],
+      "rewardBiscuits": 3,
+      "rewardWands": 2,
+      "intro": "秋季黄昏！预判重力下落后的棋盘排布。"
+    },
+    {
+      "stageId": 7,
+      "name": "枫染波涛",
+      "season": "autumn",
+      "targetScore": 17500,
+      "maxMoves": null,
+      "stars": [17500, 21000, 26000],
+      "rewardBiscuits": 4,
+      "rewardWands": 2,
+      "intro": "高分技巧：宁可留着2只不点，等周围同色汇聚成大块！"
+    },
+    {
+      "stageId": 8,
+      "name": "凛冬晶雪",
+      "season": "winter",
+      "targetScore": 22000,
+      "maxMoves": null,
+      "stars": [22000, 26500, 32000],
+      "rewardBiscuits": 5,
+      "rewardWands": 3,
+      "intro": "极地冬日！棋盘全清可拿2000分天花板封顶奖励！"
+    },
+    {
+      "stageId": 9,
+      "name": "冰海极光",
+      "season": "winter",
+      "targetScore": 27000,
+      "maxMoves": null,
+      "stars": [27000, 32500, 39000],
+      "rewardBiscuits": 5,
+      "rewardWands": 3,
+      "intro": "进入大师段位，每一步都需要深思熟虑！"
+    },
+    {
+      "stageId": 10,
+      "name": "猫星王者",
+      "season": "summer",
+      "targetScore": 33000,
+      "maxMoves": null,
+      "stars": [33000, 40000, 50000],
+      "rewardBiscuits": 10,
+      "rewardWands": 5,
+      "intro": "通关即可荣登全球巅峰榜首！"
+    }
+  ]
+}

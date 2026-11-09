@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>彩喵幻境</title>
+    <link rel="stylesheet" href="style.css?v=record-rewards-1">
+</head>
+<body>
+<div id="game-app">
+    <div id="background-container">
+        <img id="bg-image" src="assets/images/backgrounds/summer.jpg" alt="">
+        <div id="water-layer"></div>
+        <div id="particle-layer"></div>
+        <div id="seagull-layer"></div>
+    </div>
+
+    <!-- 顶部木牌：关卡 / 得分 / 通关目标 / 小鱼饼干 -->
+    <header id="hud">
+        <div class="sign">
+            <i class="sign-rope l"></i><i class="sign-rope r"></i>
+            <div class="sign-board">
+                <div class="lv-badge"><small id="stage-prefix">第</small><b id="display-stage">1</b><small id="stage-suffix">关</small></div>
+                <div class="score-block">
+                    <div class="score-line"><span class="lbl">得分</span><span id="display-score">0</span></div>
+                    <div class="goal-bar" id="goal-bar"><div id="target-progress-fill"></div><span id="display-target">累计目标 1000</span></div>
+                </div>
+                <div class="coin-block" id="btn-open-shop">
+                    <img src="assets/images/items/fish_biscuit.png" alt="">
+                    <span id="display-biscuits">5</span><i class="plus">+</i>
+                </div>
+            </div>
+        </div>
+        <div class="tools">
+            <button class="tool-btn" id="btn-open-rank" title="排行榜"><svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg></button>
+            <button class="tool-btn" id="btn-season-switch" title="切换季节"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></button>
+            <button class="tool-btn" id="btn-settings" title="设置" aria-label="设置"><svg viewBox="0 0 24 24"><path d="M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+    </header>
+
+    <main id="board-container"><div id="game-board" class="board-grid"></div></main>
+
+    <footer id="game-footer">
+        <button class="foot-btn" id="btn-exit" title="退出">
+            <svg viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></svg><span class="lbl">退出</span>
+        </button>
+        <div id="footer-info"><span id="footer-stage-info">剩余 <b id="info-left">100</b> 只猫<br>当前收尾奖励 <b id="info-bonus">0</b></span><span id="footer-endless-info" class="hidden"></span></div>
+        <button class="foot-btn" id="btn-props" title="道具栏" aria-label="打开道具栏">
+            <svg class="props-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M7 15h26v18H7zM5 10h30v8H5z"/><path d="M16 10V7a4 4 0 0 1 8 0v3M17 22h6v6h-6z"/></svg>
+            <span class="lbl">道具栏</span>
+        </button>
+    </footer>
+
+    <!-- 标题画面 -->
+    <section id="title-screen">
+        <div class="logo-main">彩喵幻境</div>
+        <div class="title-cats" id="title-cats"></div>
+        <div class="title-btns">
+            <button class="btn go" id="title-continue">继续游戏</button>
+            <button class="btn warn" id="title-new">新的一局</button>
+            <button class="btn alt" id="title-endless">无尽模式</button>
+            <button class="btn alt" id="btn-open-wheel">每日转盘</button>
+            <button class="btn alt" id="title-rank">排行榜</button>
+            <button class="btn plain" id="title-settings">设置</button>
+        </div>
+        <div class="title-best" id="title-best"></div>
+    </section>
+</div>
+
+<!-- 染色选择 -->
+<div id="color-picker-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3 class="modal-title" id="color-picker-heading">染成什么颜色</h3>
+        <p class="modal-desc" id="color-picker-description">把落单的猫接进大片同色，一次消掉更多</p>
+        <div id="color-picker-options" class="color-options-row"></div>
+        <button id="color-picker-cancel" class="btn plain">取消</button>
+    </div>
+</div>
+
+<!-- 道具栏 -->
+<div id="props-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="props-heading">
+    <div class="modal-box">
+        <h2 class="modal-title" id="props-heading">道具栏</h2>
+        <p class="modal-desc">给猫咪换个颜色，或变出一位新伙伴</p>
+        <div class="prop-item-card">
+            <img src="assets/images/items/magic_wand.svg" alt="" class="prop-item-image">
+            <div class="prop-item-copy"><h3>魔法棒 <span id="magic-count">×0</span></h3><p>在空格变出指定颜色的猫咪<br>没有支撑时会向下掉落</p></div>
+            <button id="use-magic-btn" class="shop-buy-btn">使用</button>
+        </div>
+        <div class="prop-item-card">
+            <img src="assets/images/items/wand.png" alt="" class="prop-item-image">
+            <div class="prop-item-copy"><h3>染色棒 <span id="dye-count">×1</span></h3><p>选择一只猫咪<br>换成你想要的颜色</p></div>
+            <button id="use-dye-btn" class="shop-buy-btn">使用</button>
+        </div>
+        <button id="props-cancel-tool-btn" class="btn plain hidden">取消当前道具</button>
+        <button id="props-close-btn" class="btn go">返回棋盘</button>
+    </div>
+</div>
+
+<div id="endless-rescue-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 class="modal-title">暂时没有相连的猫咪啦</h2>
+        <p class="modal-desc">可以用道具连接同色猫咪，或结算本轮总分。</p>
+        <button id="endless-rescue-btn" class="btn go">使用道具</button>
+        <button id="endless-finish-btn" class="btn plain">结束本轮</button>
+    </div>
+</div>
+
+<!-- 结算 -->
+<div id="settlement-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 class="modal-title" id="settlement-heading">本局结算</h2>
+        <div id="settlement-title" class="settle-stamp pass">通关</div>
+        <div id="personal-record-banner" class="personal-record-banner hidden" role="status" aria-live="polite"></div>
+        <div class="settle-rows">
+            <div class="srow"><span>消除得分</span><span id="settlement-base">0</span></div>
+            <div class="srow"><span>剩余猫咪</span><span id="settlement-remaining">0 只</span></div>
+            <div class="srow"><span>收尾奖励</span><span id="settlement-bonus" class="bonus">+0</span></div>
+            <div class="srow big"><span>总分</span><span id="settlement-final-score">0</span></div>
+            <div class="srow"><span>累计目标</span><span id="settlement-goal">0</span></div>
+        </div>
+        <div class="reward-line" id="settlement-reward"></div>
+        <button id="settlement-next-btn" class="btn go">下一关</button>
+        <button id="settlement-title-btn" class="btn plain">返回标题</button>
+    </div>
+</div>
+
+<!-- 转盘 -->
+<div id="wheel-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 class="modal-title">每日转盘</h2>
+        <div class="wheel-balance" role="status" aria-live="polite" aria-atomic="true">
+            <img src="assets/images/items/fish_biscuit.png" alt="">
+            <span>剩余小鱼饼干</span><b id="wheel-biscuit-display">0</b>
+        </div>
+        <div class="wheel-ticket-balance">抽奖券：<b id="wheel-ticket-display">0</b> 张</div>
+        <div class="wheel-wrap"><div class="wheel-pointer"></div><canvas id="wheel-canvas" width="280" height="280"></canvas></div>
+        <div id="wheel-result"></div>
+        <div class="wheel-btns">
+            <button id="wheel-spin-btn" class="btn go">抽一次</button>
+            <button id="wheel-close-btn" class="btn plain">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 排行榜 -->
+<div id="leaderboard-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 class="modal-title">排行榜</h2>
+        <div class="leaderboard-tabs" role="tablist" aria-label="排行榜模式">
+            <button id="rank-stage-tab" class="rank-tab" role="tab" aria-selected="true" aria-controls="leaderboard-list">关卡模式</button>
+            <button id="rank-endless-tab" class="rank-tab" role="tab" aria-selected="false" aria-controls="leaderboard-list">无尽模式</button>
+        </div>
+        <div id="leaderboard-list" class="leaderboard-scroll" role="tabpanel" aria-labelledby="rank-stage-tab"></div>
+        <button id="leaderboard-close-btn" class="btn plain">返回</button>
+    </div>
+</div>
+
+<!-- 商店 -->
+<div id="shop-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 class="modal-title">道具小铺</h2>
+        <div class="shop-banner">小鱼饼干：<span id="shop-biscuit-display">0</span></div>
+        <div class="shop-item-card">
+            <img src="assets/images/items/wand.png" alt="" class="shop-item-img">
+            <div class="shop-item-details">
+                <div class="shop-item-name">染色棒 ×1</div>
+                <div class="shop-item-desc">把任意一只猫染成别的颜色</div>
+                <div class="shop-item-price">5 小鱼饼干</div>
+            </div>
+            <button id="shop-buy-wand-btn" class="shop-buy-btn">兑换</button>
+        </div>
+        <div class="shop-item-card">
+            <img src="assets/images/items/magic_wand.svg" alt="" class="shop-item-img">
+            <div class="shop-item-details">
+                <div class="shop-item-name">魔法棒 ×1</div>
+                <div class="shop-item-desc">在空格变出指定颜色的猫咪</div>
+                <div class="shop-item-price">5 小鱼饼干</div>
+            </div>
+            <button id="shop-buy-magic-btn" class="shop-buy-btn">兑换</button>
+        </div>
+        <p class="shop-tip">关卡每 5 关加奖；无尽每 5,000 分获基础奖励；基础奖励 90% 饼干、10% 抽奖券</p>
+        <button id="shop-close-btn" class="btn plain">关闭</button>
+    </div>
+</div>
+
+<!-- 菜单 -->
+<div id="menu-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 class="modal-title">暂停</h2>
+        <button id="menu-btn-resume" class="btn go">继续游戏</button>
+        <button id="menu-btn-settings" class="btn plain">设置</button>
+        <button id="menu-btn-restart" class="btn warn">重开本关</button>
+        <button id="menu-btn-home" class="btn plain">退出到标题（自动存档）</button>
+    </div>
+</div>
+
+<!-- 声音设置 -->
+<div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-heading">
+    <div class="modal-box">
+        <h2 class="modal-title" id="settings-heading">设置</h2>
+        <div class="settings-content">
+        <p class="modal-desc">把海边的小旋律，调到喜欢的音量</p>
+        <div class="audio-setting">
+            <label for="music-volume">背景音乐 <output id="music-volume-value" for="music-volume">55%</output></label>
+            <input id="music-volume" type="range" min="0" max="100" value="55" aria-label="背景音乐音量">
+        </div>
+        <div class="audio-setting">
+            <label for="sfx-volume">游戏音效 <output id="sfx-volume-value" for="sfx-volume">75%</output></label>
+            <input id="sfx-volume" type="range" min="0" max="100" value="75" aria-label="游戏音效音量">
+            <small>消除、猫叫、庆祝及其他游戏声音</small>
+        </div>
+        <p class="modal-desc">调到 0 即静音 · 设置自动保存</p>
+        <div class="vibration-setting"><label for="vibration-enabled"><span>震动反馈</span><input id="vibration-enabled" type="checkbox" role="switch" checked></label></div>
+        <div class="palette-setting">
+            <h3 id="palette-heading">猫咪配色</h3>
+            <div id="palette-options" role="radiogroup" aria-labelledby="palette-heading"></div>
+        </div>
+        </div>
+        <button id="settings-close-btn" class="btn go">完成</button>
+    </div>
+</div>
+
+<script src="js/touch-guard.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/palettes.js"></script>
+<script src="js/board.js"></script>
+<script src="js/props.js"></script>
+<script src="js/wheel.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
