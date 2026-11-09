@@ -306,7 +306,7 @@ class PopCatGame {
                 this.state.fishBiscuits += biscuits;
                 this.state.lotteryTickets += tickets;
                 this.propsManager.showToast(`无尽奖励：${[biscuits ? `小鱼饼干 +${biscuits}` : '', tickets ? `抽奖券 +${tickets}` : ''].filter(Boolean).join('、')}！`);
-                window.sounds.playLevelClear();
+                window.sounds.playMenuTap();
             }
         }
         this.updateHeaderUI();
@@ -417,6 +417,7 @@ class PopCatGame {
 
     awardPersonalRecord(mode) {
         const s = this.state;
+        if (!s.settled || !s.runFailed) return;
         const bestKey = mode === 'endless' ? 'endlessBest' : 'highScore';
         const oldBest = Math.max(s[bestKey] || 0, StorageManager.getPersonalBest(mode));
         if (s.personalRecordReward || s.score <= 0 || s.score <= oldBest) return;
@@ -427,7 +428,7 @@ class PopCatGame {
     }
 
     showPersonalRecordReward() {
-        const reward = this.state.personalRecordReward;
+        const reward = this.state.runFailed ? this.state.personalRecordReward : null;
         const banner = this.$('personal-record-banner');
         banner.classList.toggle('hidden', !reward);
         banner.textContent = reward ? `恭喜刷新个人纪录！\n随机获得 ${reward.name} ×1` : '';
@@ -466,9 +467,14 @@ class PopCatGame {
         next.textContent = '再来一局 · 无尽模式';
         next.className = 'btn go';
         next.onclick = () => { this.$('settlement-modal').classList.add('hidden'); this.newEndlessGame(); };
-        if (s.personalRecordReward) { window.sounds.playLevelClear(); this.effects.spawnConfetti(); }
-        else window.sounds.playLose();
+        this.playFailureFeedback();
         this.$('settlement-modal').classList.remove('hidden');
+    }
+
+    playFailureFeedback() {
+        // A personal best still earns its reward, but a lost run never celebrates.
+        document.querySelectorAll('.confetti-piece').forEach(piece => piece.remove());
+        window.sounds.playLose();
     }
 
     handleSettlement() {
@@ -491,10 +497,13 @@ class PopCatGame {
             this.state.wands += reward.wands;
             this.state.magicWands += reward.magicWands;
         }
-        this.awardPersonalRecord('stage');
+        // A stage clear continues this run; compare and record its total only on failure.
+        if (!passed) {
+            this.awardPersonalRecord('stage');
+            this.state.highScore = Math.max(this.state.highScore || 0, this.state.score);
+            StorageManager.recordScore(this.state.score, this.state.stage);
+        }
         this.propsManager.updateUI();
-        this.state.highScore = Math.max(this.state.highScore || 0, this.state.score);
-        StorageManager.recordScore(this.state.score, this.state.stage);
         this.saveState();
         this.updateHeaderUI();
         this.showSettlement(bonus);
@@ -545,10 +554,15 @@ class PopCatGame {
             }
         };
 
-        if (passed || s.personalRecordReward) { window.sounds.playLevelClear(); this.effects.spawnConfetti(); }
-        else window.sounds.playLose();
+        if (passed) { window.sounds.playLevelClear(); this.effects.spawnConfetti(); }
+        else this.playFailureFeedback();
         this.$('settlement-modal').classList.remove('hidden');
     }
 }
 
 window.addEventListener('DOMContentLoaded', () => { window.game = new PopCatGame(); });
+
+// Stop decorative animations while the document is not visible.
+document.addEventListener('visibilitychange', () => {
+    document.body.classList.toggle('page-backgrounded', document.hidden);
+});

@@ -27,6 +27,12 @@ class Board {
             if (this.selectedGroup && !e.target.closest('#game-board')) this.clearSelection();
         });
 
+        this.domBoard.addEventListener('animationend', event => {
+            if (event.target.classList.contains('cat-sprite')) {
+                if (event.animationName === 'dropIn') event.target.classList.remove('falling');
+                if (event.animationName === 'spawnIn') event.target.classList.remove('spawn');
+            }
+        });
         this.startBlinkLoop();
     }
 
@@ -187,18 +193,22 @@ class Board {
         window.sounds.maybeMeow(count <= 3 ? 'kitten' : count <= 7 ? 'normal' : 'big');
         window.sounds.playPop(Math.min(1.7, 1 + (count - 2) * 0.05), count);
 
-        // 收集位置，生成碎屑 & 飘分
-        let cx = 0, cy = 0;
-        group.forEach(({ r, c }) => {
+        // Read all positions before changing styles: avoid one forced layout per cat.
+        const targets = group.map(({ r, c }) => {
             const el = this.getCellElement(r, c);
-            if (!el) return;
-            const rc = el.getBoundingClientRect();
-            const x = rc.left + rc.width / 2, y = rc.top + rc.height / 2;
+            return el ? { el, rect: el.getBoundingClientRect(), color: this.colors[this.grid[r][c]].hex } : null;
+        }).filter(Boolean);
+        let cx = 0, cy = 0;
+        const fragments = document.createDocumentFragment();
+        const stride = Math.max(1, Math.ceil(targets.length / 12));
+        targets.forEach(({ el, rect, color }, index) => {
+            const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
             cx += x; cy += y;
-            this.spawnCrumbs(x, y, this.colors[this.grid[r][c]].hex);
+            if (index % stride === 0) this.spawnCrumbs(x, y, color, fragments);
             el.classList.remove('sel');
             el.classList.add('pop');
         });
+        document.body.appendChild(fragments);
         this.showFloatingScore(gained, count, cx / count, cy / count);
         if (count >= 6) this.game.shake();
 
@@ -303,7 +313,7 @@ class Board {
 
     startBlinkLoop() {
         setInterval(() => {
-            if (this.isAnimating || this.grid.length !== this.rows) return;
+            if (document.hidden || !this.game.playing || this.isAnimating || this.grid.length !== this.rows) return;
             const cells = [];
             for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
                 if (this.grid[r][c] !== null) cells.push({ r, c });
@@ -324,42 +334,58 @@ class Board {
     }
 
     getCellElement(r, c) {
-        return this.domBoard.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+        return this.cells?.[r * this.cols + c] || null;
     }
 
     render(fall = null, spawn = false) {
-        this.domBoard.innerHTML = '';
-        for (let r = 0; r < this.rows; r++) {
-            for (let c = 0; c < this.cols; c++) {
+        // Keep the 100 cells and surviving images instead of rebuilding the board each turn.
+        if (!this.cells || this.domBoard.children.length !== this.rows * this.cols) {
+            this.cells = [];
+            const fragment = document.createDocumentFragment();
+            for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
                 const cell = document.createElement('div');
                 cell.className = 'board-cell';
                 cell.dataset.row = r;
                 cell.dataset.col = c;
-                const id = this.grid[r][c];
-                if (id === null || id === undefined) {
-                    cell.classList.add('cell-empty');
-                } else {
-                    const img = document.createElement('img');
-                    img.src = this.colors[id].normal;
-                    img.alt = '';
-                    img.draggable = false;
-                    img.className = 'cat-sprite';
-                    if (spawn) {
-                        img.classList.add('spawn');
-                        img.style.animationDelay = `${c * 22 + (this.rows - 1 - r) * 28}ms`;
-                    } else if (fall && fall[`${r},${c}`]) {
-                        img.classList.add('falling');
-                        img.style.setProperty('--fall', fall[`${r},${c}`]);
-                    }
-                    cell.appendChild(img);
-                }
-                this.domBoard.appendChild(cell);
+                this.cells.push(cell);
+                fragment.appendChild(cell);
+            }
+            this.domBoard.replaceChildren(fragment);
+        }
+        for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
+            const cell = this.getCellElement(r, c);
+            const id = this.grid[r][c];
+            const empty = id === null || id === undefined;
+            cell.className = empty ? 'board-cell cell-empty' : 'board-cell';
+            let img = cell.firstElementChild;
+            if (empty) {
+                if (img) cell.replaceChildren();
+                continue;
+            }
+            if (!img || img.tagName !== 'IMG') {
+                img = document.createElement('img');
+                img.alt = '';
+                img.draggable = false;
+                cell.replaceChildren(img);
+            }
+            while (cell.children.length > 1) cell.lastElementChild.remove();
+            const source = this.colors[id].normal;
+            if (img.getAttribute('src') !== source) img.src = source;
+            img.className = 'cat-sprite';
+            img.style.animationDelay = '';
+            img.style.removeProperty('--fall');
+            if (spawn) {
+                img.classList.add('spawn');
+                img.style.animationDelay = `${c * 22 + (this.rows - 1 - r) * 28}ms`;
+            } else if (fall && fall[`${r},${c}`]) {
+                img.classList.add('falling');
+                img.style.setProperty('--fall', fall[`${r},${c}`]);
             }
         }
         this.game.updateFooterInfo();
     }
 
-    spawnCrumbs(x, y, color) {
+    spawnCrumbs(x, y, color, fragment) {
         for (let i = 0; i < 4; i++) {
             const p = document.createElement('div');
             p.className = 'crumb';
@@ -369,7 +395,7 @@ class Board {
             const a = Math.random() * Math.PI * 2, d = 22 + Math.random() * 34;
             p.style.setProperty('--dx', `${Math.cos(a) * d}px`);
             p.style.setProperty('--dy', `${Math.sin(a) * d - 12}px`);
-            document.body.appendChild(p);
+            (fragment || document.body).appendChild(p);
             setTimeout(() => p.remove(), 700);
         }
     }

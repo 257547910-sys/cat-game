@@ -431,3 +431,7 @@ body.wand-cursor-active .board-cell:not(.cell-empty) .cat-sprite { animation: wi
 /* Explicit on descendants for mobile browsers and embedded WebViews. */
 #game-app, #game-app *, .modal-overlay, .modal-overlay *, .game-toast { touch-action: manipulation; }
 input[type="range"] { touch-action: pan-y; }
+
+/* Keep the glass appearance without continuously moving its full-screen source. */
+#bg-image { animation: none; }
+body.page-backgrounded *, body.page-backgrounded *::before, body.page-backgrounded *::after { animation-play-state: paused !important; }

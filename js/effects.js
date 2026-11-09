@@ -34,6 +34,7 @@ class EffectsManager {
     // 水面不定时荡开涟漪（泳池区域大致在画面中部）
     loopRipple() {
         const go = () => {
+            if (document.hidden || this.game.board.isAnimating) { setTimeout(go, 2500); return; }
             const ring = document.createElement('div');
             ring.className = 'ripple-ring';
             ring.style.left = `${18 + Math.random() * 64}%`;
@@ -47,6 +48,7 @@ class EffectsManager {
 
     loopGlint() {
         setInterval(() => {
+            if (document.hidden || this.game.board.isAnimating) return;
             const g = document.createElement('div');
             g.className = 'glint';
             g.style.left = `${8 + Math.random() * 84}%`;
@@ -59,6 +61,7 @@ class EffectsManager {
     // 海鸥：偶尔飞过，并叫一声
     loopGull() {
         const go = () => {
+            if (document.hidden || this.game.board.isAnimating) { setTimeout(go, 9000); return; }
             const bird = document.createElement('div');
             const ltr = Math.random() > 0.4;
             const dur = 9 + Math.random() * 4;
@@ -77,7 +80,7 @@ class EffectsManager {
     // 季节飘落物：夏天无，春天花瓣，秋天落叶，冬天雪
     spawnParticle() {
         const kind = { spring: 'petal', autumn: 'leaf', winter: 'snow' }[this.game.state.theme];
-        if (!kind || document.hidden || this.partLayer.childElementCount > 22) return;
+        if (!kind || document.hidden || this.game.board.isAnimating || this.partLayer.childElementCount > 22) return;
         const p = document.createElement('div');
         p.className = `particle ${kind}`;
         const dur = 7 + Math.random() * 6;
@@ -90,16 +93,18 @@ class EffectsManager {
 
     spawnConfetti() {
         const colors = ['#ee6c5b', '#ffc43d', '#5fd0a0', '#5aa5e8', '#a978e0', '#ff9f5a'];
-        for (let i = 0; i < 46; i++) {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < 32; i++) {
             const p = document.createElement('div');
             p.className = 'confetti-piece';
             p.style.background = colors[i % colors.length];
             p.style.left = `${Math.random() * 100}vw`;
             p.style.animationDelay = `${Math.random() * 0.8}s`;
             p.style.animationDuration = `${1.8 + Math.random() * 1.6}s`;
-            document.body.appendChild(p);
+            fragment.appendChild(p);
             setTimeout(() => p.remove(), 3800);
         }
+        document.body.appendChild(fragment);
     }
 }
 
